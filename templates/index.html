@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        *
+        {
+            margin:0;
+            padding:0;
+            scroll-behavior: smooth;
+        }
+        body{
+            background-color: aqua;
+            display: flex;
+            justify-content: center;
+            margin-top: 200px;
+        }
+        .container{
+             width:200px;
+             height:200px;
+             border: 1px solid #fff;
+             display: block;
+             padding: 15px;      
+             border-radius: 5px;
+             box-shadow: 10px 10px;
+      
+        }
+        ul{
+            display: flex;
+            flex-direction: column;
+            flex-wrap: nowrap;
+            gap:5px;
+            list-style: none;
+            justify-content: start;
+        }
+        .container h1{
+            text-align: center;
+        }
+        input{
+            transition: outline 0.5s ease;
+            outline: none;
+            height:22px;
+            width:200px;
+            border: 0;
+        }
+        input:hover{
+          outline: 2px solid yellow;
+
+        }
+        button{
+            width:75px;
+            height:25px;
+            font-size: 12px;
+            background-color: cadetblue;
+            border-radius: 5px;
+            transition: background-color 0.5s ease;
+            border: 0;
+            margin-top: 25px;
+            margin-left:50px;
+        }
+        button:hover{
+            background-color: #fff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1> signup</h1>
+        <ul class="ul-container">
+            <li><h4>Email</h4></li>
+            <li><input type="text" id="email" placeholder="Enter your email"/></li>
+            <li><h4>password</h4></li>
+            <li><input type="password" id="password" placeholder="Enter your password"/></li>
+        </ul>
+       <button onclick="submit()">sumbit</button>
+    </div>
+    <script>
+       async function submit() {
+       let email = document.getElementById("email").value;
+       let password = document.getElementById("password").value;
+   const options = {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      email: email,
+      password: password
+    }),
+  };
+  try {
+    const res = await fetch("http://localhost:3002/signup", options);
+    if (res.ok) { 
+        console.log("Account created successfully");
+        console.log("The response is::::::::::::::::", res);
+        window.location.href = 'sigin.html'; 
+    } else {
+        console.log("Failed to create account");
+
+    }
+} catch (error) {
+    console.error("Error:", error);
+    
+}
+
+}
+    </script>
+</body>
+</html>

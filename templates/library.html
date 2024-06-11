@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Library</title>
+    <link rel="stylesheet" type="text/css" href="lib.css">
+    <!-- Link to Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        .hidden {
+            display: none;
+        }
+        .hover {
+            background-color: yellow; 
+        }
+        .book {
+            padding: 10px;
+            border-bottom: 1px solid #ccc;
+            display: flex;
+            align-items: center;
+        }
+        .book i {
+            margin-right: 10px; /* Spacing between icon and text */
+            cursor: pointer;   /* Change cursor to pointer when hovering over the icon */
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <h1>Library</h1>
+        <ul class="nav-ul">
+            <li onclick="clicks()">signin/signup</li>
+        </ul>
+    </nav>
+    <div class="container">
+        <ul class="li-container">
+           <li class="btn1" onclick="btn1()">Available</li>
+           <li class="btn2" onclick="btn2()">Taken</li>
+           <li class="btn3" onclick="btn3()">Return</li>
+        </ul>
+        <div class="available">Available books...</div>
+        <div class="taken hidden">Taken books...</div>
+        <div class="return hidden">Return books...</div>
+    </div>
+    <script>
+        function clicks()
+        {
+            window.location.href = 'sigin.html'; 
+        }
+        function btn1() {
+            const btn1 = document.querySelector('.btn1');
+            const btn2 = document.querySelector('.btn2');
+            const btn3 = document.querySelector('.btn3');
+            const available = document.querySelector('.available');
+            const taken = document.querySelector('.taken');
+            const ret = document.querySelector('.return');
+            btn1.classList.toggle('hover');
+            btn2.classList.remove('hover');
+            btn3.classList.remove('hover');
+            taken.classList.add('hidden');
+            ret.classList.add('hidden');
+            available.classList.remove('hidden');
+            fetchBooks(); // Refresh the book list
+        }
+
+        function btn2() {
+            const btn1 = document.querySelector('.btn1');
+            const btn2 = document.querySelector('.btn2');
+            const btn3 = document.querySelector('.btn3');
+            const available = document.querySelector('.available');
+            const taken = document.querySelector('.taken');
+            const ret = document.querySelector('.return');
+            btn1.classList.remove('hover');
+            btn2.classList.toggle('hover');
+            btn3.classList.remove('hover');
+            available.classList.add('hidden');
+            ret.classList.add('hidden');
+            taken.classList.remove('hidden');
+            fetchtaken()
+        }
+
+        function btn3() {
+            const btn1 = document.querySelector('.btn1');
+            const btn2 = document.querySelector('.btn2');
+            const btn3 = document.querySelector('.btn3');
+            const available = document.querySelector('.available');
+            const taken = document.querySelector('.taken');
+            const ret = document.querySelector('.return');
+            btn1.classList.remove('hover');
+            btn2.classList.remove('hover');
+            btn3.classList.toggle('hover');
+            available.classList.add('hidden');
+            taken.classList.add('hidden');
+            ret.classList.remove('hidden');
+            fetchreturn()
+        }
+
+        function fetchBooks() {
+            fetch('http://localhost:3002/books')
+                .then(response => response.json())
+                .then(data => {
+                    const booksDiv = document.querySelector('.available');
+                    booksDiv.innerHTML = '';
+                    data.forEach(book => {
+                        const bookElement = document.createElement('div');
+                        bookElement.classList.add('book');
+                        bookElement.innerHTML = `
+                        <i class="fa-solid fa-circle-plus icon-toggle" data-id="${book._id}"></i><i class="fas fa-book"></i> Name: ${book.name}, Status: ${book.status}`;
+                        booksDiv.appendChild(bookElement);
+                    });
+                    addIconToggleEvent();
+                })
+                .catch(error => {
+                    console.error('Error fetching books:', error);
+                });
+        }
+        
+        function addIconToggleEvent() {
+            const icons = document.querySelectorAll('.icon-toggle');
+            icons.forEach(icon => {
+                icon.addEventListener('click', () => {
+                    const bookId = icon.getAttribute('data-id');
+                    const newStatus = icon.classList.contains('fa-circle-plus') ? 'taken' : 'available';
+        
+                    fetch('http://localhost:3002/books/' + bookId, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ status: newStatus })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.error) {
+                            console.error(data.error);
+                        } else {
+                            if (icon.classList.contains('fa-circle-plus')) {
+                                icon.classList.remove('fa-circle-plus');
+                                icon.classList.add('fa-circle-check');
+                            } else {
+                                icon.classList.remove('fa-circle-check');
+                                icon.classList.add('fa-circle-plus');
+                            }
+                            fetchBooks(); // Refresh the book list
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error updating book status:', error);
+                    });
+                });
+            });
+        }
+        function fetchtaken()
+        {
+            fetch('http://localhost:3002/takenbooks')
+            .then(response => response.json())
+            .then(data => {
+                const booksDiv = document.querySelector('.taken');
+                booksDiv.innerHTML = '';
+                data.forEach(book => {
+                    const bookElement = document.createElement('div');
+                    bookElement.classList.add('book');
+                    bookElement.innerHTML = `
+                    <i class="fas fa-book"></i> Name: ${book.name}, Status: ${book.status}`;
+                    booksDiv.appendChild(bookElement);
+                });
+            })
+            .catch(error => {
+                console.error('Error fetching books:', error);
+            });
+        }
+        function fetchreturn()
+        {
+            fetch('http://localhost:3002/takenbooks')
+            .then(response => response.json())
+            .then(data => {
+                const booksDiv = document.querySelector('.return');
+                booksDiv.innerHTML = '';
+                data.forEach(book => {
+                    const bookElement = document.createElement('div');
+                    bookElement.classList.add('book');
+                    bookElement.innerHTML = `
+                    <i class="fa-solid  fa-circle-minus icon-toggle" data-id="${book._id}"></i><i class="fas fa-book"></i> Name: ${book.name}, Status: ${book.status}`;
+                    booksDiv.appendChild(bookElement);
+                });
+                addIconToggleEvent2();
+            })
+            .catch(error => {
+                console.error('Error fetching books:', error);
+            });
+        }
+        function addIconToggleEvent2() {
+            const icons = document.querySelectorAll('.icon-toggle');
+            icons.forEach(icon => {
+                icon.addEventListener('click', () => {
+                    const bookId = icon.getAttribute('data-id');
+                    const newStatus = icon.classList.contains('fa-circle-minus') ? 'available' : 'taken';
+        
+                    fetch('http://localhost:3002/books/' + bookId, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ status: newStatus })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.error) {
+                            console.error(data.error);
+                        } else {
+                            if (icon.classList.contains('fa-circle-minus')) {
+                                icon.classList.remove('fa-circle-minus');
+                                icon.classList.add('fa-circle-plus');
+                            } else {
+                                icon.classList.remove('fa-circle-plus');
+                                icon.classList.add('fa-circle-minus');
+                            }
+                            fetchreturn(); // Refresh the book list
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error updating book status:', error);
+                    });
+                });
+            });
+        }
+        document.addEventListener('DOMContentLoaded', btn1);
+        
+    </script>
+</body>
+</html>
